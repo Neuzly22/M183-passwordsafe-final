@@ -23,7 +23,7 @@
             </div>
         </form>
     </div>
-    <a href="./index_register.php">
+    <a href="./index_register1.php">
             <button type="button">Zur Registrierung</button>
         </a>
     </body>
