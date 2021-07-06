@@ -126,6 +126,11 @@ Notizen:
 <input type="submit" value="Erstellen">
 </form>
 
+<a href="./../logout.php">
+  <button>LOGOUT</button>
+
+</a>
+
 </body>
 
 <script>
