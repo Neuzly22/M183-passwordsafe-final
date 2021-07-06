@@ -1,6 +1,19 @@
 <?php
+require_once "./../config.php";
+session_start();
+$browserPW = $_SESSION["masterPW"];
+
+$loggeduserid = $_SESSION['id'];
+
+$sql = "SELECT * from password WHERE user_idfs = $loggeduserid";
+
+
+
 if($_POST['password-password']){
     $unencryptedPW = $_POST['password-password'];
+    $pwTitle = $_POST['password-title'];
+    $pwNotes = $_POST['password-notes'];
+
     $ciphering = "AES-128-CTR";
   
     // Use OpenSSl Encryption method
@@ -11,19 +24,25 @@ if($_POST['password-password']){
     $encryption_iv = '1234567891011121';
       
     // Store the encryption key
-    $encryption_key = "Modul183Modul183";
+    $encryption_key = $browserPW;
       
     // Use openssl_encrypt() function to encrypt the data
     $encryption = openssl_encrypt($unencryptedPW, $ciphering,
     $encryption_key, $options, $encryption_iv);
+    
 
     $link1 = mysqli_connect('127.0.0.1', 'root', '', 'passwordsafe');
    
     
-    $sqlPW = "INSERT INTO password (password_title, password_password, password_notes)
-    VALUES ('$_POST["password-title"]', '$_POST["password-password"]', '$_POST["password-notes"]');
-    $link1->query($sqlPW)
+    $sqlPW = "INSERT INTO password (password_title, password_password, password_notes, user_idfs)
+    VALUES ('$pwTitle', '$encryption', '$pwNotes', '$loggeduserid')";
+    if ($link1->query($sqlPW) === TRUE) {
+        echo "New record created successfully";
+      } else {
+        echo "Error: " . $sqlPW . "<br>" . $link1->error;
+      }
 }
+
 
 
 ?>
@@ -36,15 +55,20 @@ span{
     border: 1px solid black;
     text-align: center;
 }
+
+.showPassword::after{
+content: "anzeigen";
+    
+}
 </style>
 <body>
 <h1>Übersicht</h1>
 <br>
 <h2>Deine Passwörter</h2>
 <?php
+$userID = $_SESSION["users"];
 $link = mysqli_connect('127.0.0.1', 'root', '', 'passwordsafe');
 
-$sql = "SELECT * from password;";
 
 $passwords = $link->query($sql);
 while($row = $passwords->fetch_assoc()) {
@@ -57,7 +81,27 @@ while($row = $passwords->fetch_assoc()) {
                 Notizen: <?=  $row["password_notes"]?>
             </span>
             <span>
-                Passwort: <?= $row["password_password"]?>
+            <?php 
+  
+                // Non-NULL Initialization Vector for decryption
+                $decryption_iv = '1234567891011121';
+                  
+                // Store the decryption key
+                $decryption_key = $browserPW;
+
+                $ciphering = "AES-128-CTR";
+                  
+                // Use openssl_decrypt() function to decrypt the data
+                $decryption=openssl_decrypt ($row["password_password"], $ciphering, 
+                        $decryption_key, $options, $decryption_iv);
+                         
+                ?>
+                Passwort:
+                
+                <input type="password" value="<?= $decryption?>" onclick="myFunction(this)" class="showPassword">
+                
+
+                
             </span>
         </div>
     <?php
@@ -83,3 +127,14 @@ Notizen:
 </form>
 
 </body>
+
+<script>
+function myFunction(currentElement) {
+  var x = currentElement;
+  if (x.type === "password") {
+    x.type = "text";
+  } else {
+    x.type = "password";
+  }
+}
+</script>

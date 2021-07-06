@@ -4,7 +4,7 @@ session_start();
  
 // Check if the user is already logged in, if yes then redirect him to welcome page
 if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
-    header("location: passwords.php");
+    header("location: ./frontend/passwords.php");
     exit;
 }
  
@@ -61,10 +61,12 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                             // Store data in session variables
                             $_SESSION["loggedin"] = true;
                             $_SESSION["id"] = $id;
-                            $_SESSION["username"] = $username;                            
+                            $_SESSION["username"] = $username;     
+                            $browserPW = $_POST["password"];
+                            $_SESSION["masterPW"] = $browserPW;                       
                             
                             // Redirect user to welcome page
-                            header("location: welcome.php");
+                            header("location: ./frontend/passwords.php");
                         } else{
                             // Password is not valid, display a generic error message
                             $login_err = "Invalid username or password.";
